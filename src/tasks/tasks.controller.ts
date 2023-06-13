@@ -14,6 +14,7 @@ import { TasksService } from './tasks.service';
 import { Task } from './task.model';
 import { createTaskDto } from './dto/create-task.dto';
 import { getTaskFilterDto } from './dto/get-tasks-filter.dto';
+import { TasksStatusValidationPipe } from './pipes/tasks-status-validation.pipe';
 
 @Controller('tasks')
 export class TasksController {
@@ -43,12 +44,11 @@ export class TasksController {
     return this.taskService.deleteTaskById(id);
   }
 
-  @Patch('/:id/:type')
+  @Patch('/:id/status')
   patchTaskById(
     @Param('id') id: string,
-    @Param('type') type: string,
-    @Body('value') value: string,
+    @Body('status', TasksStatusValidationPipe) status: string,
   ): Task {
-    return this.taskService.patchTaskById(id, type, value);
+    return this.taskService.patchTaskById(id, status);
   }
 }

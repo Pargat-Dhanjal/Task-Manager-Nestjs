@@ -41,7 +41,8 @@ export class TasksService {
 
   getTaskById(id: string): Task {
     const task = this.tasks.find((task) => task.id == id);
-    if (!task) throw new NotFoundException(`Task with id '${id}' is not found!`);
+    if (!task)
+      throw new NotFoundException(`Task with id '${id}' is not found!`);
     return task;
   }
 
@@ -51,15 +52,9 @@ export class TasksService {
     return task;
   }
 
-  patchTaskById(id: string, type: string, value: string): Task {
+  patchTaskById(id: string, value: string): Task {
     const task = this.getTaskById(id);
-    if (type == 'status') {
-      task.status = TaskStatus[value.toUpperCase()];
-    } else if (type == 'title') {
-      task.title = value;
-    } else if (type == 'description') {
-      task.description = value;
-    }
+    task.status = TaskStatus[value.toUpperCase()];
     return task;
   }
 }
