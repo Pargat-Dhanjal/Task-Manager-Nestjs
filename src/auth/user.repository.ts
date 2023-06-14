@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { User } from './user.entity';
 import { AuthCredintialsDto } from './dto/auth-credentials.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -15,9 +16,11 @@ export class UserRepository extends Repository<User> {
 
   async signUp(authCredintialsDto: AuthCredintialsDto): Promise<void> {
     const { username, password } = authCredintialsDto;
+
     const user = new User();
     user.username = username;
-    user.password = password;
+    user.salt = await bcrypt.genSalt();
+    user.password = await this.hashPassword(password, user.salt);
 
     try {
       await user.save();
@@ -25,5 +28,19 @@ export class UserRepository extends Repository<User> {
       if (e === '23505') throw new ConflictException('Username already exists');
       else throw new InternalServerErrorException();
     }
+  }
+
+  async validateUserPassword(authCredintialsDto: AuthCredintialsDto) {
+    const { username, password } = authCredintialsDto;
+    const user = await this.findOne({
+      where: { username },
+    });
+
+    if (user && (await user.validatePassword(password))) return user.username;
+    else return null;
+  }
+
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
   }
 }
