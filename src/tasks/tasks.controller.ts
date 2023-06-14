@@ -17,7 +17,6 @@ import { createTaskDto } from './dto/create-task.dto';
 import { getTaskFilterDto } from './dto/get-tasks-filter.dto';
 import { TasksStatusValidationPipe } from './pipes/tasks-status-validation.pipe';
 import { Task } from './task.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Controller('tasks')
 export class TasksController {
