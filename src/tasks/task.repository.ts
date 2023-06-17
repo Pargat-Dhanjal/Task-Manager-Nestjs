@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { createTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.emum';
 import { getTaskFilterDto } from './dto/get-tasks-filter.dto';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class TaskRepository extends Repository<Task> {
@@ -11,9 +12,13 @@ export class TaskRepository extends Repository<Task> {
     super(Task, dataSource.createEntityManager());
   }
 
-  async getTask(filterDto: getTaskFilterDto): Promise<Task[]> {
+  async getTask(filterDto: getTaskFilterDto, user: User): Promise<Task[]> {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
+
+    console.log(user.id);
+
+    query.where('task.userId =  :userId', { userId: user.id });
 
     if (status) query.andWhere('task.status = :status', { status });
 
@@ -27,14 +32,17 @@ export class TaskRepository extends Repository<Task> {
     return tasks;
   }
 
-  async createTask(createTaskDto: createTaskDto): Promise<Task> {
+  async createTask(createTaskDto: createTaskDto, user: User): Promise<Task> {
     const { title, description } = createTaskDto;
     const task = new Task();
     task.title = title;
     task.description = description;
     task.status = TaskStatus.OPEN;
+    task.user = user;
     await task.save();
 
+    delete task.user;
+    delete task.userId;
     return task;
   }
 }
